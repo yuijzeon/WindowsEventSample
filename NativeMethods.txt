@@ -1,0 +1,3 @@
+GetCurrentThreadId
+Windows.Win32.UI.Accessibility
+Windows.Win32.UI.WindowsAndMessaging
