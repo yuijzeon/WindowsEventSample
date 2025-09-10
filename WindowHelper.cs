@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics;
+using System.Reflection;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 
@@ -47,5 +48,30 @@ public static class WindowHelper
         Span<char> buf = stackalloc char[len + 1];
         var written = PInvoke.GetWindowText(hwnd, buf);
         return written > 0 ? new string(buf[..written]) : null;
+    }
+
+    public static unsafe uint GetProcessId(HWND hwnd)
+    {
+        uint pid;
+        _ = PInvoke.GetWindowThreadProcessId(hwnd, &pid);
+        return pid;
+    }
+
+    public static string? GetProcessName(int pid)
+    {
+        if (pid == 0)
+        {
+            return null;
+        }
+
+        try
+        {
+            var p = Process.GetProcessById(pid);
+            return p.ProcessName;
+        }
+        catch
+        {
+            return null;
+        }
     }
 }

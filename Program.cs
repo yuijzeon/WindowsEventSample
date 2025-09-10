@@ -1,4 +1,7 @@
-﻿namespace WindowsEventSample;
+﻿using Windows.Win32;
+using Windows.Win32.UI.WindowsAndMessaging;
+
+namespace WindowsEventSample;
 
 public static class Program
 {
@@ -8,6 +11,14 @@ public static class Program
         {
             listener.WinEventReceived += (_, e) =>
             {
+                if (
+                    e.ObjectId != OBJECT_IDENTIFIER.OBJID_WINDOW
+                    || e.ChildId != PInvoke.CHILDID_SELF
+                )
+                {
+                    return;
+                }
+
                 var eventName = WindowHelper.GetEventName(e.EventId);
                 var windowTitle = WindowHelper.GetTitleText(e.Hwnd);
                 if (string.IsNullOrEmpty(eventName) || string.IsNullOrEmpty(windowTitle))
@@ -15,8 +26,19 @@ public static class Program
                     return;
                 }
 
+                PInvoke.GetWindowRect(e.Hwnd, out var rect);
+                var w = rect.right - rect.left;
+                var h = rect.bottom - rect.top;
+                if (w <= 0 || h <= 0)
+                {
+                    return;
+                }
+
+                var pid = WindowHelper.GetProcessId(e.Hwnd);
+                var processName = WindowHelper.GetProcessName((int)pid);
+
                 Console.WriteLine(
-                    $"{e.EventTime:s} [{eventName, -27}] hwnd={e.Hwnd, -9:X} tid={e.IdEventThread, -6} {windowTitle}"
+                    $"{e.EventTime:s} [{eventName, -20}] {pid}:{processName} {w}x{h} {windowTitle}"
                 );
             };
 

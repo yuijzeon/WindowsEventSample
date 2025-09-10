@@ -20,8 +20,8 @@ public sealed class WinEventListener : IAsyncDisposable
         {
             _loopThreadId = PInvoke.GetCurrentThreadId();
             var hook = PInvoke.SetWinEventHook(
-                PInvoke.EVENT_MIN,
-                PInvoke.EVENT_MAX,
+                PInvoke.EVENT_OBJECT_CREATE,
+                PInvoke.EVENT_OBJECT_DESTROY,
                 HMODULE.Null,
                 (_, eventId, hwnd, idObject, idChild, idEventThread, dwmsEventTime) =>
                 {
@@ -34,9 +34,9 @@ public sealed class WinEventListener : IAsyncDisposable
                         {
                             EventId = eventId,
                             Hwnd = hwnd,
-                            IdObject = idObject,
-                            IdChild = idChild,
-                            IdEventThread = idEventThread,
+                            ObjectId = (OBJECT_IDENTIFIER)idObject,
+                            ChildId = idChild,
+                            EventThreadId = idEventThread,
                             EventTime = eventTime,
                         }
                     );
